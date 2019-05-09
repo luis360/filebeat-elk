@@ -1,0 +1,45 @@
+version: '3'
+services:
+  #elasticsearch
+  elasticsearch:
+    image: elasticsearch:7.0.1
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      #- ./data/elasticsearch:/usr/share/elasticsearch/data
+  #filebeat
+  filebeat:
+    image: elastic/filebeat:7.0.1
+    container_name: filebeat
+    volumes:
+        - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+        - ./filebeat/config/filebeat.reference.yml:/usr/share/filebeat/filebeat.reference.yml
+        - /Users/lipengcheng/www/dnmp/log/nginx:/var/log/nginx
+        - /Users/lipengcheng/www/dnmp/www/ops_config_manage/runtime/log:/data/logs
+        #- ./data/filebeat:/usr/share/filebeat/data
+    links:
+      - logstash:logstash
+    command: filebeat -c filebeat.yml
+  #logstash
+  logstash:
+    image: logstash:7.0.1
+    container_name: logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/config/logstash.conf:/usr/share/logstash/config/logstash.conf
+    links:
+      - elasticsearch:elasticsearch
+    command: logstash -f config/logstash.conf
+  #kibana
+  kibana:
+    image: kibana:7.0.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    links:
+      - elasticsearch:elasticsearch
