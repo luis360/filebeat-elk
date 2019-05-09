@@ -95,7 +95,6 @@ filebeat.inputs:
   paths:
     #- /var/log/*.log
     - /var/log/nginx/*.log
-    - /data/logs/*/*.log
     #- c:\programdata\elasticsearch\logs\*
 
   # Exclude lines. A list of regular expressions to match. It drops the lines that are
@@ -132,6 +131,14 @@ filebeat.inputs:
   # Note: After is the equivalent to previous and before is the equivalent to to next in Logstash
   #multiline.match: after
 
+- type: log
+  enabled: true
+  paths:
+    - /data/logs/*/*.log
+  #exclude_lines: ['LANG', 'ROUTE']
+  multiline.pattern: ^\[\d{4}-\d{2}-\d{2}
+  multiline.negate: true
+  multiline.match: after
 
 #============================= Filebeat modules ===============================
 
