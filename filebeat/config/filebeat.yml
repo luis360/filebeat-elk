@@ -135,7 +135,6 @@ filebeat.inputs:
   enabled: true
   paths:
     - /data/logs/*/*.log
-  #exclude_lines: ['LANG', 'ROUTE']
   multiline.pattern: ^\[\d{4}-\d{2}-\d{2}
   multiline.negate: true
   multiline.match: after
