@@ -43,4 +43,4 @@ services:
       - "5601:5601"
     links:
       - elasticsearch:elasticsearch
-    command: ./bin/kibana -c config/kibana.yml
+    command: ./bin/kibana -e -c config/kibana.yml

@@ -1,0 +1,65 @@
+input {
+    beats {
+        port => 4560
+    }
+}
+filter{
+     if [tags][0] == "nginx_log_access"{
+        grok {
+           match => ["message", "(%{IPORHOST:forwarded}|-) (%{IPORHOST:remote_addr}|-) (%{IPORHOST:host}|-) (%{IPORHOST:server_addr}|-) \[%{HTTPDATE:timestamp}\] \"%{DATA:request_method} %{DATA:request} HTTP/%{NUMBER:http_version}\" %{NUMBER:response} %{NUMBER:bytes} \"(%{DATA:referrer}|-)\" \"(%{DATA:agent}|-)\" \"%{DATA:request_time}\" \"%{DATA:response_time}\""]
+        }
+        kv {
+                source => "request"
+                field_split => "&?"
+                value_split => "="
+        }
+        urldecode {
+           all_fields => true
+        }
+
+     }
+     if [tags][0] == "nginx_log_error"{
+        grok {
+           match => [ "message" , "(?<timestamp>%{YEAR}[./-]%{MONTHNUM}[./-]%{MONTHDAY}[- ]%{TIME}) \[%{LOGLEVEL:severity}\] %{POSINT:pid}#%{NUMBER}: %{GREEDYDATA:errormessage}(?:, client: (?<remote_addr>%{IP}|%{HOSTNAME}))(?:, server: %{USERNAME:server}?)(?:, request: %{QS:request})?(?:, upstream: (?<upstream>\"%{URI}\"|%{QS}))?(?:, host: %{QS:request_host})?(?:, referrer: \"%{URI:referrer}\")?"]
+        }
+        kv {
+                        source => "request"
+                        field_split => "&?"
+                        value_split => "="
+        }
+        urldecode {
+           all_fields => true
+        }
+
+     }
+}
+output {
+   if [tags][0] == "nginx_log_access"{
+      elasticsearch {
+         hosts => ["10.0.3.109:9200"]
+         index => "nginx-log"
+      }
+   }
+   if [tags][0] == "nginx_log_error"{
+      elasticsearch {
+         hosts => ["10.0.3.109:9200"]
+         index => "nginx-log"
+      }
+   }
+   #if [tags][0] == "nginx_log_error"{
+   # stdout {
+   #     codec => rubydebug
+   # }
+   #}
+   #if [tags][0] == "nginx_log_access"{
+   # stdout {
+   #     codec => rubydebug
+   # }
+   #}
+   if [tags][0] == "lanzu_log"{
+     elasticsearch {
+        hosts => ["10.0.3.109:9200"]
+        index => "lanzu-log"
+     }
+    }
+}

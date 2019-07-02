@@ -46,10 +46,10 @@ filebeat.modules:
     #input:
 
 #-------------------------------- Nginx Module --------------------------------
-- module: nginx
+#- module: nginx
   # Access logs
-  access:
-    enabled: true
+  #access:
+  #  enabled: true
 
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
@@ -63,8 +63,8 @@ filebeat.modules:
     #var.convert_timezone: false
 
   # Error logs
-  error:
-    enabled: true
+  #error:
+  #  enabled: true
 
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
@@ -135,9 +135,14 @@ filebeat.inputs:
   enabled: true
   paths:
     - /data/logs/*/*.log
-  multiline.pattern: ^\[\d{4}-\d{2}-\d{2}
+  #tags: ["lanzu_log"]
+  #fields:
+  #  project: zz_channels
+  multiline.pattern: ^((\[\d{4}-\d{2}-\d{2}) | (\{\"ip\"))
   multiline.negate: true
   multiline.match: after
+  ignore_older: 168h
+  exclude_lines: ['^---']
 
 #============================= Filebeat modules ===============================
 
